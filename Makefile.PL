@@ -14,8 +14,8 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'		=> 'XML::YYLex',
     'VERSION_FROM'	=> 'YYLex.pm', # finds $VERSION
-    'CONFIGURE'		=> \&check_for_dom_parsers,
-#    'PREREQ_PM'		=> {}, # e.g., Module::Name => 1.1
+#    'CONFIGURE'		=> \&check_for_dom_parsers,
+    'PREREQ_PM'		=> &check_for_dom_parsers,
     ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM => 'YYLex.pm', # retrieve abstract from module
        AUTHOR     => 'Daniel Boesswetter <boesswetter@peppermind.de>') : ()),
@@ -38,15 +38,20 @@ sub check_for_dom_parsers {
     }
 
     if ( !@found_parsers ) {
-	die "\nYou don't seem to have a seem to have one of the supported 
+	warn "\nYou don't seem to have a seem to have one of the supported 
 DOM-parsers (".join( ", ", @known_parsers ).") installed ...
 
-Aborting.
+I will take XML::DOM as prerequisite now (maybe your CPAN-shell will
+install it for you). If you would like to use anoter DOM-module, please
+install it yourself.
 
-"
+";
+	return( { "XML::DOM" => 0 } );
     }
 
-    my @res = map { ( "PREREQ_PM", { $_ => 0 } ) } @found_parsers;
-    return { @res };
+    ## ugh, we really should require minimum versions ...
+    #my @res = map { ( "PREREQ_PM", { $_ => 0 } ) } @found_parsers;
+    return { map { $_ => 0 } @found_parsers };
+    #return { @res };
 }
 
